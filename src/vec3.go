@@ -40,6 +40,15 @@ func (v Vec3) Divide(f float64) Vec3 {
 	return NewVec3(v.e[0]/f, v.e[1]/f, v.e[2]/f)
 }
 
+// Minus returns a new vector equal to one vec subtracted from another
+func (v Vec3) Minus(other Vec3) Vec3 {
+	return NewVec3(
+		v.e[0]-other.e[0],
+		v.e[1]-other.e[1],
+		v.e[2]-other.e[2],
+	)
+}
+
 // Plus returns a new vector from two added vectors
 func (v Vec3) Plus(other Vec3) Vec3 {
 	return NewVec3(
@@ -59,4 +68,9 @@ func NewVec3(e0, e1, e2 float64) Vec3 {
 	return Vec3{
 		e: [3]float64{e0, e1, e2},
 	}
+}
+
+// dot returns the sum of two vectors multiplied together
+func dot(v1, v2 Vec3) float64 {
+	return v1.e[0]*v2.e[0] + v1.e[1]*v2.e[1] + v1.e[2]*v2.e[2]
 }
