@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"math"
+	"math/rand"
+	"time"
 )
 
 // colorFromRay returns the (R, G, B) value of a pixel based on
@@ -29,22 +31,28 @@ func colorFromRay(r *Ray, world HitableList) Vec3 {
 	return white.Times(1.0 - t).Plus(teal.Times(t))
 }
 
-// Main outputs a PPM image of the scene to stdout
+// init seeds the random library for true randomness
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+// main outputs a PPM image of the scene to stdout of size (nx, ny) pixels
 func main() {
 	nx := 200
 	ny := 100
+	numSamples := 100
 
-	// Define the bounds of the scene and the origin of all Rays
-	lowerLeft := NewVec3(-2.0, -1.0, -1.0)
-	horizontal := NewVec3(4.0, 0.0, 0.0)
-	vertical := NewVec3(0.0, 2.0, 0.0)
-	origin := NewVec3(0.0, 0.0, 0.0)
-
-	// Define objects in the scene
+	// Define boundaries of and objects in the scene
+	camera := Camera{
+		NewVec3(-2, -1, -1),
+		NewVec3(4, 0, 0),
+		NewVec3(0, 2, 0),
+		NewVec3(0, 0, 0),
+	}
 	hitables := []Hitable{
-		// little sphere on top
+		// little sphere on top (focus of scene)
 		Sphere{NewVec3(0, 0, -1), 0.5},
-		// huge sphere on bottom (world)
+		// huge sphere on bottom (terrain/ground)
 		Sphere{NewVec3(0, -100.5, -1), 100},
 	}
 	world := HitableList{hitables, 2}
@@ -56,18 +64,22 @@ func main() {
 	// bottom-right (max X) pixels. Left-to-right, top-to-botton.
 	for j := ny - 1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
+			// Start with an empty color vector for each pixel
+			color := NewVec3(0, 0, 0)
 
-			// Calculate (X, Y) where Ray intersects the background
-			u := float64(i) / float64(nx)
-			v := float64(j) / float64(ny)
+			// Take many samples for each pixel, randomly using pixels
+			// adjacent to the target pixel to provide anti-aliasing
+			for s := 0; s < numSamples; s++ {
+				// Calculate (X, Y) where this sample intersects the background
+				u := (float64(i) + rand.Float64()) / float64(nx)
+				v := (float64(j) + rand.Float64()) / float64(ny)
+				// Aggregate the colors of each sample
+				ray := camera.GetRay(u, v)
+				color = color.Plus(colorFromRay(&ray, world))
+			}
 
-			// Create a Ray going from the static origin to this pixel in canvas
-			direction := lowerLeft.Plus(horizontal.Times(u)).Plus(vertical.Times(v))
-			r := Ray{origin, direction}
-
-			// Calculate the color based on the Ray and objects in the scene
-			color := colorFromRay(&r, world)
-
+			// Average the color from all the samples
+			color = color.Divide(float64(numSamples))
 			// Print (Red, Green, Blue) as integers 0-255
 			color.Times(255.99).PrintInts()
 		}
