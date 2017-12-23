@@ -6,14 +6,11 @@ Created following the book [Ray Tracing in One Weekend](http://in1weekend.blogsp
 
 ## Getting Started
 
+Build the binary, run the program to generate an image, and open it in an image viewer.
+
 ```bash
-# Build the binary
 go build -o ./bin/raytracer ./src/
-
-# Run the program to generate an image
 ./bin/raytracer > output.ppm
-
-# Open in an Image Viewer of your choice
 open output.ppm
 ```
 
