@@ -40,6 +40,15 @@ func (v Vec3) Divide(f float64) Vec3 {
 	return NewVec3(v.e[0]/f, v.e[1]/f, v.e[2]/f)
 }
 
+// Pow returns a new vector raised to a giver power
+func (v Vec3) Pow(f float64) Vec3 {
+	return NewVec3(
+		math.Pow(v.e[0], f),
+		math.Pow(v.e[1], f),
+		math.Pow(v.e[2], f),
+	)
+}
+
 // Minus returns a new vector equal to one vec subtracted from another
 func (v Vec3) Minus(other Vec3) Vec3 {
 	return NewVec3(

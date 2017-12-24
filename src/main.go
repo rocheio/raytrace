@@ -7,18 +7,36 @@ import (
 	"time"
 )
 
+// randomInUnitSphere returns a random vector within a unit sphere
+func randomInUnitSphere() Vec3 {
+	var point Vec3
+	for {
+		// Calculate a random point in a unit cube
+		point = NewVec3(
+			rand.Float64(),
+			rand.Float64(),
+			rand.Float64(),
+		).Times(2).Minus(NewVec3(1, 1, 1))
+
+		// If the point is within a unit sphere, return it
+		if point.Length()*point.Length() < 1 {
+			return point
+		}
+	}
+}
+
 // colorFromRay returns the (R, G, B) value of a pixel based on
 // how a Ray interacts with objects in a HitableList
 func colorFromRay(r *Ray, world HitableList) Vec3 {
 	var rec HitRecord
 
-	if world.Hit(r, 0, math.MaxFloat64, &rec) {
-		// Return color to visualize surface normal from hit point
-		return NewVec3(
-			rec.normal.x()+1,
-			rec.normal.y()+1,
-			rec.normal.z()+1,
-		).Times(0.5)
+	// Use 0.001 tMin to avoid hits near zero causing shadow acne
+	if world.Hit(r, 0.001, math.MaxFloat64, &rec) {
+		// Absorb half the color of the Ray and reflect it randomly.
+		// Recurse with the reflected Ray until it does not hit an object.
+		target := rec.p.Plus(rec.normal).Plus(randomInUnitSphere())
+		ray := Ray{rec.p, target.Minus(rec.p)}
+		return colorFromRay(&ray, world).Times(0.5)
 	}
 
 	// Draw a white to teal gradient background based on the scaled
@@ -80,6 +98,8 @@ func main() {
 
 			// Average the color from all the samples
 			color = color.Divide(float64(numSamples))
+			// Correct color to gamma 2
+			color = color.Pow(0.5)
 			// Print (Red, Green, Blue) as integers 0-255
 			color.Times(255.99).PrintInts()
 		}
