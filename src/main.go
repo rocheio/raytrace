@@ -7,40 +7,29 @@ import (
 	"time"
 )
 
-// randomInUnitSphere returns a random vector within a unit sphere
-func randomInUnitSphere() Vec3 {
-	var point Vec3
-	for {
-		// Calculate a random point in a unit cube
-		point = NewVec3(
-			rand.Float64(),
-			rand.Float64(),
-			rand.Float64(),
-		).Times(2).Minus(NewVec3(1, 1, 1))
-
-		// If the point is within a unit sphere, return it
-		if point.Length()*point.Length() < 1 {
-			return point
-		}
-	}
-}
-
 // colorFromRay returns the (R, G, B) value of a pixel based on
-// how a Ray interacts with objects in a HitableList
-func colorFromRay(r *Ray, world HitableList) Vec3 {
+// how a Ray interacts with objects in a HitableList.
+func colorFromRay(r *Ray, world HitableList, depth int32) Vec3 {
 	var rec HitRecord
 
 	// Use 0.001 tMin to avoid hits near zero causing shadow acne
 	if world.Hit(r, 0.001, math.MaxFloat64, &rec) {
-		// Absorb half the color of the Ray and reflect it randomly.
-		// Recurse with the reflected Ray until it does not hit an object.
-		target := rec.p.Plus(rec.normal).Plus(randomInUnitSphere())
-		ray := Ray{rec.p, target.Minus(rec.p)}
-		return colorFromRay(&ray, world).Times(0.5)
+		// Scatter the Ray and absorb some of its flux based on the Material.
+		// Recurse with the scattered Ray until it does not hit an object.
+		// If a Ray scatters over 50 times, just return pure black.
+		var scattered Ray
+		var attenuation Vec3
+		m := *rec.material
+
+		if depth < 50 && m.Scatter(r, &rec, &attenuation, &scattered) {
+			return colorFromRay(&scattered, world, depth+1).Cross(attenuation)
+		}
+
+		return NewVec3(0, 0, 0)
 	}
 
-	// Draw a white to teal gradient background based on the scaled
-	// Y value of the direction of a Ray
+	// If no object is hit, draw a white to teal gradient background
+	// based on the scaled Y value of the direction of a Ray
 	white := NewVec3(1.0, 1.0, 1.0)
 	teal := NewVec3(0.5, 0.7, 1.0)
 	// Scale Y value to between 0 and 1
@@ -68,12 +57,16 @@ func main() {
 		NewVec3(0, 0, 0),
 	}
 	hitables := []Hitable{
-		// little sphere on top (focus of scene)
-		Sphere{NewVec3(0, 0, -1), 0.5},
-		// huge sphere on bottom (terrain/ground)
-		Sphere{NewVec3(0, -100.5, -1), 100},
+		// Huge green matte sphere on bottom (terrain/ground)
+		Sphere{NewVec3(0, -100.5, -1), 100, Lambertian{NewVec3(0.8, 0.8, 0)}},
+		// Silver metal sphere on left
+		Sphere{NewVec3(-1, 0, -1), 0.5, Metal{NewVec3(0.8, 0.8, 0.8), 0.3}},
+		// Red matte sphere in middle
+		Sphere{NewVec3(0, 0, -1), 0.5, Lambertian{NewVec3(0.8, 0.3, 0.3)}},
+		// Gold metal sphere on right
+		Sphere{NewVec3(1, 0, -1), 0.5, Metal{NewVec3(0.8, 0.6, 0.2), 1}},
 	}
-	world := HitableList{hitables, 2}
+	world := HitableList{hitables, len(hitables)}
 
 	// Print PPM file header / metadata
 	fmt.Printf("P3\n%d %d\n255\n", nx, ny)
@@ -93,7 +86,7 @@ func main() {
 				v := (float64(j) + rand.Float64()) / float64(ny)
 				// Aggregate the colors of each sample
 				ray := camera.GetRay(u, v)
-				color = color.Plus(colorFromRay(&ray, world))
+				color = color.Plus(colorFromRay(&ray, world, 0))
 			}
 
 			// Average the color from all the samples

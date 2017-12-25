@@ -6,8 +6,9 @@ import (
 
 // Sphere is a spherical Hitable
 type Sphere struct {
-	center Vec3
-	radius float64
+	center   Vec3
+	radius   float64
+	material Material
 }
 
 // Hit returns True and updates HitRecord if it intersects the Sphere
@@ -25,6 +26,7 @@ func (s Sphere) Hit(r *Ray, tMin, tMax float64, rec *HitRecord) bool {
 			rec.t = temp
 			rec.p = r.PointAtParameter(rec.t)
 			rec.normal = rec.p.Minus(s.center).Divide(s.radius)
+			rec.material = &s.material
 			return true
 		}
 		temp = (-b + math.Sqrt(b*b-a*c)) / a
@@ -32,6 +34,7 @@ func (s Sphere) Hit(r *Ray, tMin, tMax float64, rec *HitRecord) bool {
 			rec.t = temp
 			rec.p = r.PointAtParameter(rec.t)
 			rec.normal = rec.p.Minus(s.center).Divide(s.radius)
+			rec.material = &s.material
 			return true
 		}
 	}

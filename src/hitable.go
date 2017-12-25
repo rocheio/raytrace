@@ -1,11 +1,12 @@
 package main
 
-// HitRecord stores the time, hit point, and surface normal
+// HitRecord stores the time, hit point, surface normal, and material
 // of the last object a Ray hit during tracing
 type HitRecord struct {
-	t      float64
-	p      Vec3
-	normal Vec3
+	t        float64
+	p        Vec3
+	normal   Vec3
+	material *Material
 }
 
 // Hitable is any object in the scene that could be hit by a Ray

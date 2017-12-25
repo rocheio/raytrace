@@ -67,6 +67,15 @@ func (v Vec3) Plus(other Vec3) Vec3 {
 	)
 }
 
+// Cross returns a Vec3 from two vectors multiplied together
+func (v Vec3) Cross(other Vec3) Vec3 {
+	return NewVec3(
+		v.e[0]*other.e[0],
+		v.e[1]*other.e[1],
+		v.e[2]*other.e[2],
+	)
+}
+
 // AsUnit returns a new, similar, Vec3 scaled between -1 and 1
 func (v Vec3) AsUnit() Vec3 {
 	return v.Divide(v.Length())
@@ -82,4 +91,9 @@ func NewVec3(e0, e1, e2 float64) Vec3 {
 // dot returns the sum of two vectors multiplied together
 func dot(v1, v2 Vec3) float64 {
 	return v1.e[0]*v2.e[0] + v1.e[1]*v2.e[1] + v1.e[2]*v2.e[2]
+}
+
+// reflect returns the Vec3 reflected from an input Vec3 and a surface normal
+func reflect(v, n Vec3) Vec3 {
+	return v.Minus(n.Times(2 * dot(v, n)))
 }
