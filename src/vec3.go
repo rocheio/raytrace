@@ -97,3 +97,18 @@ func dot(v1, v2 Vec3) float64 {
 func reflect(v, n Vec3) Vec3 {
 	return v.Minus(n.Times(2 * dot(v, n)))
 }
+
+// refract checks if a Vec3 and surface normal can produce a refraction.
+// Set the value of the refracted Vec3 and return true if so.
+// If false, the angle of refraction would be too high, and the resulting
+// ray / vector must be reflected completely with no refraction.
+func refract(v, n Vec3, niOverNt float64, refracted *Vec3) bool {
+	uv := v.AsUnit()
+	dt := dot(uv, n)
+	discriminant := 1.0 - niOverNt*niOverNt*(1-dt*dt)
+	if discriminant > 0 {
+		*refracted = uv.Minus(n.Times(dt)).Times(niOverNt).Minus(n.Times(math.Sqrt(discriminant)))
+		return true
+	}
+	return false
+}

@@ -59,12 +59,13 @@ func main() {
 	hitables := []Hitable{
 		// Huge green matte sphere on bottom (terrain/ground)
 		Sphere{NewVec3(0, -100.5, -1), 100, Lambertian{NewVec3(0.8, 0.8, 0)}},
-		// Silver metal sphere on left
-		Sphere{NewVec3(-1, 0, -1), 0.5, Metal{NewVec3(0.8, 0.8, 0.8), 0.3}},
-		// Red matte sphere in middle
-		Sphere{NewVec3(0, 0, -1), 0.5, Lambertian{NewVec3(0.8, 0.3, 0.3)}},
-		// Gold metal sphere on right
-		Sphere{NewVec3(1, 0, -1), 0.5, Metal{NewVec3(0.8, 0.6, 0.2), 1}},
+		// Hollow glass sphere on left
+		Sphere{NewVec3(-1, 0, -1), 0.5, Dielectric{1.5}},
+		Sphere{NewVec3(-1, 0, -1), -0.45, Dielectric{1.5}},
+		// Blue matte sphere in middle
+		Sphere{NewVec3(0, 0, -1), 0.5, Lambertian{NewVec3(0.1, 0.2, 0.5)}},
+		// Shiny gold metal sphere on right
+		Sphere{NewVec3(1, 0, -1), 0.5, Metal{NewVec3(0.8, 0.6, 0.2), 0}},
 	}
 	world := HitableList{hitables, len(hitables)}
 
