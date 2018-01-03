@@ -22,7 +22,7 @@ func colorFromRay(r *Ray, world HitableList, depth int32) Vec3 {
 		m := *rec.material
 
 		if depth < 50 && m.Scatter(r, &rec, &attenuation, &scattered) {
-			return colorFromRay(&scattered, world, depth+1).Cross(attenuation)
+			return colorFromRay(&scattered, world, depth+1).TimesVec(attenuation)
 		}
 
 		return NewVec3(0, 0, 0)
@@ -49,13 +49,15 @@ func main() {
 	ny := 100
 	numSamples := 100
 
-	// Define boundaries of and objects in the scene
-	camera := Camera{
-		NewVec3(-2, -1, -1),
-		NewVec3(4, 0, 0),
-		NewVec3(0, 2, 0),
-		NewVec3(0, 0, 0),
-	}
+	// Define camera for and boundaries of the scene
+	lookFrom := NewVec3(-2, 2, 1)
+	lookAt := NewVec3(0, 0, -1)
+	viewUp := NewVec3(0, 1, 0)
+	vFOV := float64(40)
+	aspect := float64(nx) / float64(ny)
+	camera := NewCamera(lookFrom, lookAt, viewUp, vFOV, aspect)
+
+	// Define objects in the scene
 	hitables := []Hitable{
 		// Huge green matte sphere on bottom (terrain/ground)
 		Sphere{NewVec3(0, -100.5, -1), 100, Lambertian{NewVec3(0.8, 0.8, 0)}},

@@ -67,8 +67,8 @@ func (v Vec3) Plus(other Vec3) Vec3 {
 	)
 }
 
-// Cross returns a Vec3 from two vectors multiplied together
-func (v Vec3) Cross(other Vec3) Vec3 {
+// TimesVec returns a Vec3 from two vectors multiplied together
+func (v Vec3) TimesVec(other Vec3) Vec3 {
 	return NewVec3(
 		v.e[0]*other.e[0],
 		v.e[1]*other.e[1],
@@ -88,9 +88,18 @@ func NewVec3(e0, e1, e2 float64) Vec3 {
 	}
 }
 
-// dot returns the sum of two vectors multiplied together
+// dot returns the mathematical dot product of two vectors
 func dot(v1, v2 Vec3) float64 {
 	return v1.e[0]*v2.e[0] + v1.e[1]*v2.e[1] + v1.e[2]*v2.e[2]
+}
+
+// cross returns the mathematical cross product of two vectors
+func cross(v1, v2 Vec3) Vec3 {
+	return NewVec3(
+		v1.e[1]*v2.e[2]-v1.e[2]*v2.e[1],
+		(v1.e[0]*v2.e[2]-v1.e[2]*v2.e[0])*-1,
+		v1.e[0]*v2.e[1]-v1.e[1]*v2.e[0],
+	)
 }
 
 // reflect returns the Vec3 reflected from an input Vec3 and a surface normal
