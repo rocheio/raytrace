@@ -7,6 +7,56 @@ import (
 	"time"
 )
 
+func randomHitable(center Vec3) Hitable {
+	chooseMaterial := rand.Float64()
+	if chooseMaterial < 0.8 {
+		// Diffuse material
+		return Sphere{center, 0.2,
+			Lambertian{NewVec3(
+				rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64(),
+			)},
+		}
+	} else if chooseMaterial < 0.95 {
+		// Metal material
+		return Sphere{center, 0.2,
+			Metal{NewVec3(
+				0.5*(1+rand.Float64()),
+				0.5*(1+rand.Float64()),
+				0.5*(1+rand.Float64()),
+			), 0.5 * rand.Float64()},
+		}
+	}
+
+	// Glass material
+	return Sphere{center, 0.2, Dielectric{1.5}}
+}
+
+func randomScene() HitableList {
+	// Start with huge grey 'world' underneath
+	hitables := []Hitable{
+		Sphere{NewVec3(0, -1000, 0), 1000, Lambertian{NewVec3(0.5, 0.5, 0.5)}},
+	}
+	// Add tiny little spheres (random materials) scattered around
+	for a := -11; a < 11; a++ {
+		for b := -11; b < 11; b++ {
+			center := NewVec3(
+				float64(a)+0.9*rand.Float64(),
+				0.2,
+				float64(b)+0.9*rand.Float64(),
+			)
+			if center.Minus(NewVec3(4, 0.2, 0)).Length() > 0.9 {
+				hitables = append(hitables, randomHitable(center))
+			}
+		}
+	}
+	// Add 3 large spheres to middle of scene
+	hitables = append(hitables, Sphere{NewVec3(0, 1, 0), 1, Dielectric{1.5}})
+	hitables = append(hitables, Sphere{NewVec3(-4, 1, 0), 1, Lambertian{NewVec3(0.4, 0.2, 0.1)}})
+	hitables = append(hitables, Sphere{NewVec3(4, 1, 0), 1, Metal{NewVec3(0.7, 0.6, 0.5), 0}})
+
+	return HitableList{hitables, len(hitables)}
+}
+
 // colorFromRay returns the (R, G, B) value of a pixel based on
 // how a Ray interacts with objects in a HitableList.
 func colorFromRay(r *Ray, world HitableList, depth int32) Vec3 {
@@ -45,34 +95,23 @@ func init() {
 
 // main outputs a PPM image of the scene to stdout of size (nx, ny) pixels
 func main() {
-	nx := 200
-	ny := 100
+	nx := 400
+	ny := 200
 	numSamples := 100
 
 	// Define camera for and boundaries of the scene
-	lookFrom := NewVec3(3, 3, 2)
+	lookFrom := NewVec3(8, 2, 3)
 	lookAt := NewVec3(0, 0, -1)
 	viewUp := NewVec3(0, 1, 0)
-	vFOV := float64(20)
+	vFOV := float64(50)
 	aspect := float64(nx) / float64(ny)
-	aperture := 1.0
+	aperture := 0.2
 	distToFocus := lookFrom.Minus(lookAt).Length()
 
 	camera := NewCamera(lookFrom, lookAt, viewUp, vFOV, aspect, aperture, distToFocus)
 
 	// Define objects in the scene
-	hitables := []Hitable{
-		// Huge green matte sphere on bottom (terrain/ground)
-		Sphere{NewVec3(0, -100.5, -1), 100, Lambertian{NewVec3(0.8, 0.8, 0)}},
-		// Hollow glass sphere on left
-		Sphere{NewVec3(-1, 0, -1), 0.5, Dielectric{1.5}},
-		Sphere{NewVec3(-1, 0, -1), -0.45, Dielectric{1.5}},
-		// Blue matte sphere in middle
-		Sphere{NewVec3(0, 0, -1), 0.5, Lambertian{NewVec3(0.1, 0.2, 0.5)}},
-		// Shiny gold metal sphere on right
-		Sphere{NewVec3(1, 0, -1), 0.5, Metal{NewVec3(0.8, 0.6, 0.2), 0}},
-	}
-	world := HitableList{hitables, len(hitables)}
+	world := randomScene()
 
 	// Print PPM file header / metadata
 	fmt.Printf("P3\n%d %d\n255\n", nx, ny)
