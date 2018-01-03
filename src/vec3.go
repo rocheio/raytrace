@@ -21,7 +21,7 @@ func (v Vec3) g() float64 { return v.e[1] }
 func (v Vec3) b() float64 { return v.e[2] }
 
 // Length returns the mathematical length of a 3d vector
-func (v *Vec3) Length() float64 {
+func (v Vec3) Length() float64 {
 	return math.Sqrt(v.e[0]*v.e[0] + v.e[1]*v.e[1] + v.e[2]*v.e[2])
 }
 

@@ -50,12 +50,15 @@ func main() {
 	numSamples := 100
 
 	// Define camera for and boundaries of the scene
-	lookFrom := NewVec3(-2, 2, 1)
+	lookFrom := NewVec3(3, 3, 2)
 	lookAt := NewVec3(0, 0, -1)
 	viewUp := NewVec3(0, 1, 0)
-	vFOV := float64(40)
+	vFOV := float64(20)
 	aspect := float64(nx) / float64(ny)
-	camera := NewCamera(lookFrom, lookAt, viewUp, vFOV, aspect)
+	aperture := 1.0
+	distToFocus := lookFrom.Minus(lookAt).Length()
+
+	camera := NewCamera(lookFrom, lookAt, viewUp, vFOV, aspect, aperture, distToFocus)
 
 	// Define objects in the scene
 	hitables := []Hitable{
