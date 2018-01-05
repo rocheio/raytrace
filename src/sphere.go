@@ -6,7 +6,7 @@ import (
 
 // Sphere is a spherical Hitable
 type Sphere struct {
-	center   Vec3
+	center   *Vec3
 	radius   float64
 	material Material
 }

@@ -8,11 +8,11 @@ import (
 // Camera defines the frame boundaries and an origin for all rays
 // for the 2d image that will be created from a 3d world
 type Camera struct {
-	lowerLeft  Vec3
-	horizontal Vec3
-	vertical   Vec3
-	origin     Vec3
-	u, v, w    Vec3
+	lowerLeft  *Vec3
+	horizontal *Vec3
+	vertical   *Vec3
+	origin     *Vec3
+	u, v, w    *Vec3
 	lensRadius float64
 }
 
@@ -35,7 +35,7 @@ func (c Camera) GetRay(s, t float64) Ray {
 // viewUp: Defines the 'up' direction of the camera, allows roll / tilt
 // vFOV: Vertical field of view, 0-180 degrees. How 'big' an image feels.
 // aspect: (Width / Height) ratio of the image size
-func NewCamera(lookFrom Vec3, lookAt Vec3, viewUp Vec3, vFOV float64, aspect float64, aperature float64, focusDist float64) Camera {
+func NewCamera(lookFrom, lookAt, viewUp *Vec3, vFOV float64, aspect float64, aperature float64, focusDist float64) Camera {
 	lensRadius := aperature / 2
 	theta := vFOV * math.Pi / 180
 	halfHeight := math.Tan(theta / 2)
@@ -66,8 +66,8 @@ func NewCamera(lookFrom Vec3, lookAt Vec3, viewUp Vec3, vFOV float64, aspect flo
 
 // randomInUnitDisk returns a random point within a virtual 3d disk.
 // Useful for approximating an aperture / depth of field from a Camera.
-func randomInUnitDisk() Vec3 {
-	var p Vec3
+func randomInUnitDisk() *Vec3 {
+	var p *Vec3
 	for {
 		p = NewVec3(rand.Float64(), rand.Float64(), 0).Times(2).
 			Minus(NewVec3(1, 1, 0))

@@ -7,19 +7,19 @@ import (
 	"time"
 )
 
-func randomHitable(center Vec3) Hitable {
+func randomHitable(center *Vec3) Hitable {
 	chooseMaterial := rand.Float64()
 	if chooseMaterial < 0.8 {
 		// Diffuse material
 		return Sphere{center, 0.2,
-			Lambertian{NewVec3(
+			Lambertian{*NewVec3(
 				rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64(), rand.Float64()*rand.Float64(),
 			)},
 		}
 	} else if chooseMaterial < 0.95 {
 		// Metal material
 		return Sphere{center, 0.2,
-			Metal{NewVec3(
+			Metal{*NewVec3(
 				0.5*(1+rand.Float64()),
 				0.5*(1+rand.Float64()),
 				0.5*(1+rand.Float64()),
@@ -34,7 +34,7 @@ func randomHitable(center Vec3) Hitable {
 func randomScene() HitableList {
 	// Start with huge grey 'world' underneath
 	hitables := []Hitable{
-		Sphere{NewVec3(0, -1000, 0), 1000, Lambertian{NewVec3(0.5, 0.5, 0.5)}},
+		Sphere{NewVec3(0, -1000, 0), 1000, Lambertian{*NewVec3(0.5, 0.5, 0.5)}},
 	}
 	// Add tiny little spheres (random materials) scattered around
 	for a := -11; a < 11; a++ {
@@ -51,15 +51,15 @@ func randomScene() HitableList {
 	}
 	// Add 3 large spheres to middle of scene
 	hitables = append(hitables, Sphere{NewVec3(0, 1, 0), 1, Dielectric{1.5}})
-	hitables = append(hitables, Sphere{NewVec3(-4, 1, 0), 1, Lambertian{NewVec3(0.4, 0.2, 0.1)}})
-	hitables = append(hitables, Sphere{NewVec3(4, 1, 0), 1, Metal{NewVec3(0.7, 0.6, 0.5), 0}})
+	hitables = append(hitables, Sphere{NewVec3(-4, 1, 0), 1, Lambertian{*NewVec3(0.4, 0.2, 0.1)}})
+	hitables = append(hitables, Sphere{NewVec3(4, 1, 0), 1, Metal{*NewVec3(0.7, 0.6, 0.5), 0}})
 
 	return HitableList{hitables, len(hitables)}
 }
 
 // colorFromRay returns the (R, G, B) value of a pixel based on
 // how a Ray interacts with objects in a HitableList.
-func colorFromRay(r *Ray, world HitableList, depth int32) Vec3 {
+func colorFromRay(r *Ray, world HitableList, depth int32) *Vec3 {
 	var rec HitRecord
 
 	// Use 0.001 tMin to avoid hits near zero causing shadow acne
@@ -72,7 +72,7 @@ func colorFromRay(r *Ray, world HitableList, depth int32) Vec3 {
 		m := *rec.material
 
 		if depth < 50 && m.Scatter(r, &rec, &attenuation, &scattered) {
-			return colorFromRay(&scattered, world, depth+1).TimesVec(attenuation)
+			return colorFromRay(&scattered, world, depth+1).TimesVec(&attenuation)
 		}
 
 		return NewVec3(0, 0, 0)
@@ -95,9 +95,9 @@ func init() {
 
 // main outputs a PPM image of the scene to stdout of size (nx, ny) pixels
 func main() {
-	nx := 400
-	ny := 200
-	numSamples := 100
+	nx := 200
+	ny := 100
+	numSamples := 20
 
 	// Define camera for and boundaries of the scene
 	lookFrom := NewVec3(8, 2, 3)

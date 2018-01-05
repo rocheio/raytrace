@@ -43,13 +43,13 @@ func (m Metal) Scatter(rIn *Ray, rec *HitRecord, attenuation *Vec3, scattered *R
 }
 
 // NewMetal returns a Metal object, ensuring 0 <= fuzz <= 1
-func NewMetal(a Vec3, f float64) Metal {
+func NewMetal(a *Vec3, f float64) Metal {
 	if f < 0 {
 		f = 0
 	} else if f > 1 {
 		f = 1
 	}
-	return Metal{a, f}
+	return Metal{*a, f}
 }
 
 // Dielectric is a material that always refracts rays when possible.
@@ -73,20 +73,20 @@ func (d Dielectric) Scatter(rIn *Ray, rec *HitRecord, attenuation *Vec3, scatter
 	reflected := reflect(rIn.Direction, rec.normal)
 
 	// Always 1, glass surface absorbs nothing
-	*attenuation = NewVec3(1, 1, 1)
+	*attenuation = *NewVec3(1, 1, 1)
 
 	// Check if the ray should be refracted
 	if dot(rIn.Direction, rec.normal) > 0 {
-		outwardNormal = rec.normal.Times(-1)
+		outwardNormal = *rec.normal.Times(-1)
 		niOverNt = d.refractIndex
 		cosine = d.refractIndex * dot(rIn.Direction, rec.normal) / rIn.Direction.Length()
 	} else {
-		outwardNormal = rec.normal
+		outwardNormal = *rec.normal
 		niOverNt = 1.0 / d.refractIndex
 		cosine = -1 * dot(rIn.Direction, rec.normal) / rIn.Direction.Length()
 	}
 
-	if refract(rIn.Direction, outwardNormal, niOverNt, &refracted) {
+	if refract(rIn.Direction, &outwardNormal, niOverNt, &refracted) {
 		reflectProb = schlick(cosine, d.refractIndex)
 	} else {
 		reflectProb = 1.0
@@ -95,14 +95,14 @@ func (d Dielectric) Scatter(rIn *Ray, rec *HitRecord, attenuation *Vec3, scatter
 	if rand.Float64() < reflectProb {
 		*scattered = Ray{rec.p, reflected}
 	} else {
-		*scattered = Ray{rec.p, refracted}
+		*scattered = Ray{rec.p, &refracted}
 	}
 	return true
 }
 
 // randomInUnitSphere returns a random vector within a unit sphere
-func randomInUnitSphere() Vec3 {
-	var point Vec3
+func randomInUnitSphere() *Vec3 {
+	var point *Vec3
 	for {
 		// Calculate a random point in a unit cube
 		point = NewVec3(

@@ -4,8 +4,8 @@ package main
 // of the last object a Ray hit during tracing
 type HitRecord struct {
 	t        float64
-	p        Vec3
-	normal   Vec3
+	p        *Vec3
+	normal   *Vec3
 	material *Material
 }
 
