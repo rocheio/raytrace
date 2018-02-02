@@ -95,9 +95,9 @@ func init() {
 
 // main outputs a PPM image of the scene to stdout of size (nx, ny) pixels
 func main() {
-	nx := 200
-	ny := 100
-	numSamples := 20
+	nx := 400
+	ny := 200
+	numSamples := 200
 
 	// Define camera for and boundaries of the scene
 	lookFrom := NewVec3(8, 2, 3)
