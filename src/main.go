@@ -32,9 +32,9 @@ func randomHitable(center *Vec3) Hitable {
 }
 
 func randomScene() HitableList {
-	// Start with huge grey 'world' underneath
+	// Start with huge 'world' underneath
 	hitables := []Hitable{
-		Sphere{NewVec3(0, -1000, 0), 1000, Lambertian{*NewVec3(0.5, 0.5, 0.5)}},
+		Sphere{NewVec3(0, -1000, 0), 1000, Lambertian{*NewVec3(0.2, 0.6, 0.1)}},
 	}
 	// Add tiny little spheres (random materials) scattered around
 	for a := -11; a < 11; a++ {
@@ -49,9 +49,11 @@ func randomScene() HitableList {
 			}
 		}
 	}
-	// Add 3 large spheres to middle of scene
+	// Add large spheres to middle of scene
+	hitables = append(hitables, Sphere{NewVec3(-8, 1, 0), 1, Dielectric{1.5}})
+	hitables = append(hitables, Sphere{NewVec3(-4, 1, 0), 1, Lambertian{*NewVec3(0.2, 0.2, 0.9)}})
 	hitables = append(hitables, Sphere{NewVec3(0, 1, 0), 1, Dielectric{1.5}})
-	hitables = append(hitables, Sphere{NewVec3(-4, 1, 0), 1, Lambertian{*NewVec3(0.4, 0.2, 0.1)}})
+	hitables = append(hitables, Sphere{NewVec3(0, 1, 0), -0.95, Dielectric{1.5}})
 	hitables = append(hitables, Sphere{NewVec3(4, 1, 0), 1, Metal{*NewVec3(0.7, 0.6, 0.5), 0}})
 
 	return HitableList{hitables, len(hitables)}

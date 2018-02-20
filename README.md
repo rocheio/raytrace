@@ -4,7 +4,7 @@ A raytracing program written in Go.
 
 Created following the book [Ray Tracing in One Weekend](http://in1weekend.blogspot.com/2016/01/ray-tracing-in-one-weekend.html) by Peter Shirley (original source code written in C++).
 
-![Output of the final program](/docs/final.png)
+![Output of the final program](/docs/custom.png)
 
 ## Getting Started
 
